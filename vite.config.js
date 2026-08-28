@@ -11,7 +11,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg"],
+      includeAssets: ["favicon.ico", "apple-touch-icon.png"],
       manifest: {
         name: "FORTIMETAL",
         short_name: "FORTIMETAL",
