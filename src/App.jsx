@@ -1,15 +1,12 @@
-import { NavLink, Route, Routes } from "react-router-dom";
-import { Home, PackageSearch, Ruler, Sparkles, FileText } from "lucide-react";
+import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon } from "lucide-react";
 
 import SupplierDirectory from "./components/SupplierDirectory.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
-
-// NOTA sobre login: todavía no está integrado aquí (ver PROJECT_STATUS.md — se decidió
-// usar Google OAuth pero está pausado hasta tener el correo de empresa). Cuando esté
-// listo, esta es la pantalla donde se debe guardar el token (ver getAuthToken() dentro
-// de SupplierDirectory.jsx, hoy lee window.__FORTIMETAL_TOKEN__).
+import Login from "./components/Login.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 
 const NAV_ITEMS = [
   { to: "/", label: "Inicio", icon: Home, end: true },
@@ -18,6 +15,53 @@ const NAV_ITEMS = [
   { to: "/cotizador", label: "Cotizador", icon: FileText },
   { to: "/vista-previa", label: "Vista IA", icon: Sparkles },
 ];
+
+// Envuelve rutas que requieren sesión (hoy solo /proveedores, porque el backend
+// exige token para GET /suppliers). Si no hay sesión, manda a /login y recuerda
+// a dónde volver.
+function RequireAuth({ children }) {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+  return children;
+}
+
+function TopBar() {
+  const { user, logout } = useAuth();
+  return (
+    <div
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "flex-end",
+        gap: 10, padding: "10px 16px", fontSize: 12.5, color: "#4B5157",
+      }}
+    >
+      {user ? (
+        <>
+          <UserIcon size={14} />
+          <span>{user.full_name}</span>
+          <button
+            onClick={logout}
+            style={{
+              display: "flex", alignItems: "center", gap: 4, background: "none",
+              border: "none", color: "#4B5157", cursor: "pointer", fontSize: 12.5,
+            }}
+          >
+            <LogOut size={14} /> Salir
+          </button>
+        </>
+      ) : (
+        <NavLink
+          to="/login"
+          style={{ display: "flex", alignItems: "center", gap: 4, color: "#F5A623", textDecoration: "none" }}
+        >
+          <LogIn size={14} /> Iniciar sesión
+        </NavLink>
+      )}
+    </div>
+  );
+}
 
 function HomePage() {
   return (
@@ -34,16 +78,25 @@ function HomePage() {
 export default function App() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <TopBar />
       <main style={{ flex: 1, paddingBottom: 72 }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/proveedores" element={<SupplierDirectory />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/proveedores"
+            element={
+              <RequireAuth>
+                <SupplierDirectory />
+              </RequireAuth>
+            }
+          />
           <Route path="/calculadora" element={<MaterialTakeoffCalculator />} />
           <Route path="/cotizador" element={<BudgetGenerator />} />
           {/* companySlug y quoteId reales llegan del flujo del cotizador público
-              (POST /public/{slug}/quotes) una vez que el login/cotizador formal esté
-              conectado. Sin ellos, el componente sigue funcionando pero no persiste
-              la imagen en el backend — ver comentario en RoofPreviewGenerator.jsx. */}
+              (POST /public/{slug}/quotes). Sin ellos, el componente sigue
+              funcionando pero no persiste la imagen en el backend — ver
+              comentario en RoofPreviewGenerator.jsx. */}
           <Route path="/vista-previa" element={<RoofPreviewGenerator />} />
         </Routes>
       </main>

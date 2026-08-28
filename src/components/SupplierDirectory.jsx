@@ -1,22 +1,15 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Search, Phone, MessageCircle, MapPin, X, PackageSearch } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
 
 // ---------------------------------------------------------------------------
 // CONEXIÓN CON EL BACKEND
 // En desarrollo, Vite hace proxy de /api/v1 a localhost:8000 (ver vite.config.js).
 // En producción, define VITE_API_BASE_URL con la URL real del backend desplegado
-// (repo separado). También reemplaza getAuthToken() por como sea que guardes el
-// token de sesión (localStorage, contexto de auth, etc.) en el resto de tu PWA.
+// (repo separado). El token de sesión ahora viene del AuthContext (login con
+// Google) en vez del placeholder window.__FORTIMETAL_TOKEN__ que había antes.
 // ---------------------------------------------------------------------------
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL || ""}/api/v1`;
-
-function getAuthToken() {
-  try {
-    return window.__FORTIMETAL_TOKEN__ || null;
-  } catch {
-    return null;
-  }
-}
 
 // Datos de ejemplo — se usan solo si el backend no responde (por ejemplo, en esta
 // vista previa sin servidor). En producción, con el backend corriendo, esto no se usa.
@@ -29,6 +22,7 @@ const DEMO_SUPPLIERS = [
 ];
 
 export default function SupplierDirectory() {
+  const { accessToken } = useAuth();
   const [suppliers, setSuppliers] = useState(DEMO_SUPPLIERS);
   const [categories, setCategories] = useState([]);
   const [query, setQuery] = useState("");
@@ -37,8 +31,7 @@ export default function SupplierDirectory() {
   const [usingDemoData, setUsingDemoData] = useState(false);
 
   const fetchSuppliers = useCallback(async (q, category) => {
-    const token = getAuthToken();
-    if (!token) {
+    if (!accessToken) {
       setUsingDemoData(true);
       setLoading(false);
       return;
@@ -51,10 +44,10 @@ export default function SupplierDirectory() {
 
       const [suppliersRes, categoriesRes] = await Promise.all([
         fetch(`${API_BASE}/suppliers?${params.toString()}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }),
         fetch(`${API_BASE}/suppliers/categories`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }),
       ]);
       if (!suppliersRes.ok || !categoriesRes.ok) throw new Error("Respuesta no válida del servidor");
@@ -69,7 +62,7 @@ export default function SupplierDirectory() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [accessToken]);
 
   useEffect(() => {
     const timeout = setTimeout(() => fetchSuppliers(query, activeCategory), 300);
