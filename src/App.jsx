@@ -1,7 +1,8 @@
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings } from "lucide-react";
 
 import SupplierDirectory from "./components/SupplierDirectory.jsx";
+import SupplierAdmin from "./components/SupplierAdmin.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
@@ -28,6 +29,25 @@ function RequireAuth({ children }) {
   return children;
 }
 
+// Igual que RequireAuth, pero además exige rol admin/super_admin — para pantallas
+// de gestión (crear/editar/borrar) que el backend también protege con
+// get_current_admin. Un cliente normal que entre acá ve un aviso, no un error feo.
+function RequireAdmin({ children }) {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+  if (user?.role !== "admin" && user?.role !== "super_admin") {
+    return (
+      <div style={{ padding: 32, textAlign: "center", color: "#4B5157" }}>
+        Esta sección es solo para administradores de la empresa.
+      </div>
+    );
+  }
+  return children;
+}
+
 function TopBar() {
   const { user, logout } = useAuth();
   return (
@@ -41,6 +61,14 @@ function TopBar() {
         <>
           <UserIcon size={14} />
           <span>{user.full_name}</span>
+          {(user.role === "admin" || user.role === "super_admin") && (
+            <NavLink
+              to="/admin/proveedores"
+              style={{ display: "flex", alignItems: "center", gap: 4, color: "#4B5157", textDecoration: "none" }}
+            >
+              <Settings size={14} /> Administrar
+            </NavLink>
+          )}
           <button
             onClick={logout}
             style={{
@@ -89,6 +117,14 @@ export default function App() {
               <RequireAuth>
                 <SupplierDirectory />
               </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/proveedores"
+            element={
+              <RequireAdmin>
+                <SupplierAdmin />
+              </RequireAdmin>
             }
           />
           <Route path="/calculadora" element={<MaterialTakeoffCalculator />} />
