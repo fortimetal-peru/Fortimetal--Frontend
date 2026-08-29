@@ -219,7 +219,7 @@ export default function BudgetGenerator() {
         </button>
       </header>
 
-      <main style={{ padding: "18px 16px 100px", maxWidth: 640, margin: "0 auto" }}>
+      <main style={{ padding: "18px 16px 160px", maxWidth: 640, margin: "0 auto" }}>
         {/* Datos del cliente */}
         <section style={{ background: "#FFFFFF", border: "1px solid #DEE0DD", borderRadius: 10, padding: 14, marginBottom: 14 }}>
           <h2 className="fm-display" style={{ fontSize: 13, color: "#1A1D21", margin: "0 0 10px", letterSpacing: "0.02em" }}>
@@ -364,9 +364,13 @@ export default function BudgetGenerator() {
         )}
       </main>
 
-      {/* Barra de acciones fija abajo */}
+      {/* Barra de acciones fija abajo — se posiciona 60px arriba del borde (en vez de
+          bottom: 0) porque la barra de navegación inferior de la app (Inicio/Proveedores/...
+          en App.jsx) también está fija en bottom: 0 con más prioridad (zIndex más alto):
+          sin este ajuste, esta barra queda tapada por completo detrás de la de navegación
+          y "Descargar PDF"/"Compartir" son invisibles aunque existan y funcionen. */}
       {lineItems.length > 0 && (
-        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "#FFFFFF", borderTop: "1px solid #DEE0DD", padding: "10px 16px", display: "flex", gap: 10, maxWidth: 640, margin: "0 auto" }}>
+        <div style={{ position: "fixed", bottom: 60, left: 0, right: 0, background: "#FFFFFF", borderTop: "1px solid #DEE0DD", padding: "10px 16px", display: "flex", gap: 10, maxWidth: 640, margin: "0 auto", zIndex: 9 }}>
           <button
             className="fm-btn" onClick={handleDownload}
             style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "12px 0", borderRadius: 8, border: "1px solid #1A1D21", background: "#FFFFFF", color: "#1A1D21", fontSize: 13.5, fontWeight: 600, cursor: "pointer" }}
