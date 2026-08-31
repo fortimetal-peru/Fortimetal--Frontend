@@ -30,6 +30,14 @@ export const DEFAULTS = {
   TRUSS_MEMBER_FACTOR: 1.3, // los tijerales llevan diagonales/verticales además de las cuerdas; factor sobre el largo de agua
   FENCE_POST_SPACING_M: 2.5, // separación típica entre postes de cerco
   FENCE_MESH_KG_PER_M2: 3.5, // peso aproximado de malla/paño por m² (referencial)
+  PARABOLIC_ARC_FACTOR: 1.18, // una cobertura curva (arco/parabólico) desarrolla más superficie que
+  // un techo a dos aguas de pendiente baja — aproximación para flecha típica ~1/6 de la luz.
+  RAILING_POST_SPACING_M: 1.2, // separación típica de postes en baranda de escalera/balcón
+  RAILING_RAIL_LINES: 2, // pasamanos + travesaño intermedio (líneas horizontales de tubo)
+  GRILLE_BAR_SPACING_M: 0.12, // separación entre barrotes verticales de una reja de seguridad típica
+  GATE_BAR_SPACING_M: 0.15, // separación entre barrotes de un portón (algo más abierta que una reja)
+  GATE_HINGES: 3, // bisagras típicas de un portón batiente de una hoja
+  LIFT_GATE_RAIL_EXTRA_M: 1.0, // tramo horizontal de riel hacia el techo, además de la altura del vano
 };
 
 function round2(value) {
@@ -54,12 +62,19 @@ export function computeTrussCount(lengthM, trussSpacingM) {
  * proyección horizontal (para pendientes bajas, ~5-15%, esta aproximación es suficiente).
  */
 export function computeSlopeLength(widthM, roofType = "dos_aguas", pitchFactor = DEFAULTS.ROOF_PITCH_FACTOR) {
-  const baseWidth = roofType === "una_agua" ? widthM : widthM / 2;
+  // "una_agua" y "parabolico" cubren todo el ancho con una sola superficie continua;
+  // "dos_aguas" reparte el ancho en dos aguas iguales que bajan desde la cumbrera.
+  const baseWidth = roofType === "dos_aguas" ? widthM / 2 : widthM;
   return round2(baseWidth * pitchFactor);
 }
 
 export function numberOfSlopes(roofType = "dos_aguas") {
-  return roofType === "una_agua" ? 1 : 2;
+  return roofType === "dos_aguas" ? 2 : 1;
+}
+
+/** Factor de alargamiento por curvatura/pendiente según el tipo de techo. */
+export function getPitchFactor(roofType = "dos_aguas") {
+  return roofType === "parabolico" ? DEFAULTS.PARABOLIC_ARC_FACTOR : DEFAULTS.ROOF_PITCH_FACTOR;
 }
 
 /**
@@ -191,8 +206,8 @@ export function computeRoofTakeoff(inputs) {
     throw new Error("Largo, ancho, separación de tijerales y de correas deben ser mayores a 0.");
   }
 
-  const sheets = computeSheetTakeoff({ lengthM, widthM, roofType, sheetLengthM });
-  const tubes = computeTubeTakeoff({ lengthM, widthM, roofType, trussSpacingM, purlinSpacingM });
+  const sheets = computeSheetTakeoff({ lengthM, widthM, roofType, sheetLengthM, pitchFactor: getPitchFactor(roofType) });
+  const tubes = computeTubeTakeoff({ lengthM, widthM, roofType, trussSpacingM, purlinSpacingM, pitchFactor: getPitchFactor(roofType) });
   const screws = computeScrewTakeoff({ totalSheets: sheets.totalSheets, sheetLengthM, purlinSpacingM });
   const paint = computePaintTakeoff({ totalTubeMeters: tubes.totalMetersWithWaste, tubeProfile });
   const welding = computeWeldingTakeoff({ trussCount: tubes.trussCount });
@@ -270,7 +285,9 @@ export function computeFenceTakeoff({
 
 const STEP_RISE_M = 0.18; // altura típica de paso (contrapaso) en escalera metálica
 
-/** Despiece de una escalera metálica según el desnivel a salvar. */
+/**
+ * Arma el despiece completo de una escalera metálica según el desnivel a salvar.
+ */
 export function computeStairTakeoff({ riseM, widthM = 1.0, tubeProfile = "2x1" }) {
   if (!(riseM > 0)) throw new Error("El desnivel (riseM) debe ser mayor a 0.");
   const stepCount = Math.ceil(riseM / STEP_RISE_M);
@@ -288,4 +305,179 @@ export function computeStairTakeoff({ riseM, widthM = 1.0, tubeProfile = "2x1" }
   ];
 
   return { items, detail: { stepCount, stringerLength, totalMetersWithWaste, strips, paint } };
+}
+
+// ---------------------------------------------------------------------------
+// COBERTURA METÁLICA — cerramiento/cobertura plana simple (pared o cobertizo
+// sin la estructura completa de tijerales de un galpón), solo marco + plancha.
+// ---------------------------------------------------------------------------
+
+/**
+ * Despiece de una cobertura metálica plana: reutiliza el mismo despiece de
+ * planchas que un techo a una agua (computeSheetTakeoff con pitchFactor=1,
+ * porque acá no hay pendiente que alargue la superficie), más un marco de
+ * tubo simple (perimetral + parantes intermedios) en vez de tijerales.
+ */
+export function computeCladdingTakeoff({ lengthM, heightM, sheetLengthM = 3.66, tubeProfile = "2x1" }) {
+  if (!(lengthM > 0) || !(heightM > 0)) {
+    throw new Error("Largo y altura deben ser mayores a 0.");
+  }
+  const sheets = computeSheetTakeoff({ lengthM, widthM: heightM, roofType: "una_agua", sheetLengthM, pitchFactor: 1 });
+
+  const perimeterMeters = round2(lengthM * 2); // línea superior + inferior del marco
+  const studCount = Math.ceil(lengthM / 1.0) + 1; // parantes verticales cada ~1m
+  const studMeters = round2(studCount * heightM);
+  const totalMeters = round2(perimeterMeters + studMeters);
+  const totalMetersWithWaste = round2(totalMeters * DEFAULTS.TUBE_CUT_WASTE_FACTOR);
+  const strips = Math.ceil(totalMetersWithWaste / DEFAULTS.TUBE_STANDARD_LENGTH_M);
+
+  const screws = computeScrewTakeoff({ totalSheets: sheets.totalSheets, sheetLengthM, purlinSpacingM: 1.0 });
+  const paint = computePaintTakeoff({ totalTubeMeters: totalMetersWithWaste, tubeProfile });
+
+  const items = [
+    { description: `Tiras de tubo ${tubeProfile}" (marco y parantes)`, unit: "und", quantity: strips },
+    { description: `Planchas de cobertura TR-4 (${sheetLengthM}m)`, unit: "und", quantity: sheets.totalSheets },
+    { description: "Pernos autoperforantes", unit: "und", quantity: screws.totalScrews },
+    { description: `Pintura anticorrosiva (perfil ${tubeProfile}")`, unit: "gal", quantity: paint.gallons },
+  ];
+
+  return { items, detail: { sheets, studCount, totalMetersWithWaste, strips, screws, paint } };
+}
+
+// ---------------------------------------------------------------------------
+// BARANDAS — pasamanos de escalera o balcón: postes + 2 líneas de tubo
+// horizontal (pasamanos + travesaño), sin malla ni paño.
+// ---------------------------------------------------------------------------
+
+export function computeRailingTakeoff({
+  lengthM,
+  heightM = 1.0,
+  postSpacingM = DEFAULTS.RAILING_POST_SPACING_M,
+  railLines = DEFAULTS.RAILING_RAIL_LINES,
+  tubeProfile = "1.5x1.5",
+}) {
+  if (!(lengthM > 0) || !(heightM > 0)) {
+    throw new Error("Largo y altura deben ser mayores a 0.");
+  }
+  const postCount = Math.ceil(lengthM / postSpacingM) + 1;
+  const postMeters = round2(postCount * heightM);
+  const railMeters = round2(lengthM * railLines);
+  const totalMeters = round2(postMeters + railMeters);
+  const totalMetersWithWaste = round2(totalMeters * DEFAULTS.TUBE_CUT_WASTE_FACTOR);
+  const strips = Math.ceil(totalMetersWithWaste / DEFAULTS.TUBE_STANDARD_LENGTH_M);
+  const paint = computePaintTakeoff({ totalTubeMeters: totalMetersWithWaste, tubeProfile });
+
+  const items = [
+    { description: `Postes de tubo ${tubeProfile}"`, unit: "und", quantity: postCount },
+    { description: `Tiras de tubo ${tubeProfile}" (pasamanos y travesaños)`, unit: "und", quantity: strips },
+    { description: `Pintura anticorrosiva (perfil ${tubeProfile}")`, unit: "gal", quantity: paint.gallons },
+  ];
+
+  return { items, detail: { postCount, totalMetersWithWaste, strips, paint } };
+}
+
+// ---------------------------------------------------------------------------
+// REJAS — marco + barrotes verticales para un vano de ventana/puerta.
+// ---------------------------------------------------------------------------
+
+export function computeGrilleTakeoff({
+  widthM,
+  heightM,
+  barSpacingM = DEFAULTS.GRILLE_BAR_SPACING_M,
+  tubeProfile = "1.5x1.5",
+}) {
+  if (!(widthM > 0) || !(heightM > 0)) {
+    throw new Error("Ancho y altura deben ser mayores a 0.");
+  }
+  const perimeterMeters = round2((widthM + heightM) * 2);
+  const barCount = Math.ceil(widthM / barSpacingM) + 1;
+  const barMeters = round2(barCount * heightM);
+  const totalMeters = round2(perimeterMeters + barMeters);
+  const totalMetersWithWaste = round2(totalMeters * DEFAULTS.TUBE_CUT_WASTE_FACTOR);
+  const strips = Math.ceil(totalMetersWithWaste / DEFAULTS.TUBE_STANDARD_LENGTH_M);
+
+  // Uniones soldadas: cada barrote se suelda arriba y abajo, más las 4 esquinas del marco.
+  const totalJoints = barCount * 2 + 4;
+  const electrodeKg = round2(totalJoints * DEFAULTS.WELD_KG_PER_JOINT);
+  const paint = computePaintTakeoff({ totalTubeMeters: totalMetersWithWaste, tubeProfile });
+
+  const items = [
+    { description: `Tiras de tubo ${tubeProfile}" (marco y barrotes)`, unit: "und", quantity: strips },
+    { description: "Electrodos de soldadura", unit: "kg", quantity: electrodeKg },
+    { description: `Pintura anticorrosiva (perfil ${tubeProfile}")`, unit: "gal", quantity: paint.gallons },
+  ];
+
+  return { items, detail: { barCount, totalMetersWithWaste, strips, electrodeKg, paint } };
+}
+
+// ---------------------------------------------------------------------------
+// PORTONES — como una reja, pero con refuerzo diagonal (arriostre en X) y
+// herrajes de portón (bisagras, pasador). Se asume una sola hoja batiente;
+// para un portón de dos hojas, calcula cada hoja por separado.
+// ---------------------------------------------------------------------------
+
+export function computeGateTakeoff({
+  widthM,
+  heightM,
+  barSpacingM = DEFAULTS.GATE_BAR_SPACING_M,
+  tubeProfile = "1.5x1.5",
+}) {
+  if (!(widthM > 0) || !(heightM > 0)) {
+    throw new Error("Ancho y altura deben ser mayores a 0.");
+  }
+  const perimeterMeters = round2((widthM + heightM) * 2);
+  const diagonalMeters = round2(Math.sqrt(widthM ** 2 + heightM ** 2) * 2); // arriostre en X
+  const barCount = Math.ceil(widthM / barSpacingM) + 1;
+  const barMeters = round2(barCount * heightM);
+  const totalMeters = round2(perimeterMeters + diagonalMeters + barMeters);
+  const totalMetersWithWaste = round2(totalMeters * DEFAULTS.TUBE_CUT_WASTE_FACTOR);
+  const strips = Math.ceil(totalMetersWithWaste / DEFAULTS.TUBE_STANDARD_LENGTH_M);
+
+  const totalJoints = barCount * 2 + 8; // barrotes + esquinas de marco y diagonales
+  const electrodeKg = round2(totalJoints * DEFAULTS.WELD_KG_PER_JOINT);
+  const paint = computePaintTakeoff({ totalTubeMeters: totalMetersWithWaste, tubeProfile });
+
+  const items = [
+    { description: `Tiras de tubo ${tubeProfile}" (marco, diagonales y barrotes)`, unit: "und", quantity: strips },
+    { description: "Bisagras pesadas", unit: "und", quantity: DEFAULTS.GATE_HINGES },
+    { description: "Pasador / cerrojo", unit: "und", quantity: 1 },
+    { description: "Electrodos de soldadura", unit: "kg", quantity: electrodeKg },
+    { description: `Pintura anticorrosiva (perfil ${tubeProfile}")`, unit: "gal", quantity: paint.gallons },
+  ];
+
+  return { items, detail: { barCount, totalMetersWithWaste, strips, electrodeKg, paint } };
+}
+
+// ---------------------------------------------------------------------------
+// PUERTA LEVADIZA AUTOMÁTICA — panel de plancha + riel guía + kit motorreductor.
+// ---------------------------------------------------------------------------
+
+export function computeLiftGateTakeoff({
+  widthM,
+  heightM,
+  sheetLengthM = 3.66,
+  tubeProfile = "2x1",
+}) {
+  if (!(widthM > 0) || !(heightM > 0)) {
+    throw new Error("Ancho y altura deben ser mayores a 0.");
+  }
+  const panel = computeSheetTakeoff({ lengthM: widthM, widthM: heightM, roofType: "una_agua", sheetLengthM, pitchFactor: 1 });
+
+  const perimeterMeters = round2((widthM + heightM) * 2);
+  const totalMetersWithWaste = round2(perimeterMeters * DEFAULTS.TUBE_CUT_WASTE_FACTOR);
+  const strips = Math.ceil(totalMetersWithWaste / DEFAULTS.TUBE_STANDARD_LENGTH_M);
+
+  // Riel guía a cada lado: sube la altura del vano y se prolonga en horizontal hacia el techo.
+  const railMeters = round2((heightM + DEFAULTS.LIFT_GATE_RAIL_EXTRA_M) * 2);
+  const paint = computePaintTakeoff({ totalTubeMeters: totalMetersWithWaste, tubeProfile });
+
+  const items = [
+    { description: `Tiras de tubo ${tubeProfile}" (marco de panel)`, unit: "und", quantity: strips },
+    { description: `Planchas de panel (${sheetLengthM}m)`, unit: "und", quantity: panel.totalSheets },
+    { description: "Riel guía", unit: "m", quantity: railMeters },
+    { description: "Kit motorreductor", unit: "und", quantity: 1 },
+    { description: `Pintura anticorrosiva (perfil ${tubeProfile}")`, unit: "gal", quantity: paint.gallons },
+  ];
+
+  return { items, detail: { panel, railMeters, totalMetersWithWaste, strips, paint } };
 }

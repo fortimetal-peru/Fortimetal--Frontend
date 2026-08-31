@@ -1,8 +1,10 @@
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings } from "lucide-react";
+import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase } from "lucide-react";
 
 import SupplierDirectory from "./components/SupplierDirectory.jsx";
 import SupplierAdmin from "./components/SupplierAdmin.jsx";
+import Portfolio from "./components/Portfolio.jsx";
+import PortfolioAdmin from "./components/PortfolioAdmin.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
@@ -12,6 +14,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 const NAV_ITEMS = [
   { to: "/", label: "Inicio", icon: Home, end: true },
   { to: "/proveedores", label: "Proveedores", icon: PackageSearch },
+  { to: "/portafolio", label: "Trabajos", icon: Briefcase },
   { to: "/calculadora", label: "Metrados", icon: Ruler },
   { to: "/cotizador", label: "Cotizador", icon: FileText },
   { to: "/vista-previa", label: "Vista IA", icon: Sparkles },
@@ -62,12 +65,20 @@ function TopBar() {
           <UserIcon size={14} />
           <span>{user.full_name}</span>
           {(user.role === "admin" || user.role === "super_admin") && (
-            <NavLink
-              to="/admin/proveedores"
-              style={{ display: "flex", alignItems: "center", gap: 4, color: "#4B5157", textDecoration: "none" }}
-            >
-              <Settings size={14} /> Administrar
-            </NavLink>
+            <>
+              <NavLink
+                to="/admin/proveedores"
+                style={{ display: "flex", alignItems: "center", gap: 4, color: "#4B5157", textDecoration: "none" }}
+              >
+                <Settings size={14} /> Administrar
+              </NavLink>
+              <NavLink
+                to="/admin/portafolio"
+                style={{ display: "flex", alignItems: "center", gap: 4, color: "#4B5157", textDecoration: "none" }}
+              >
+                <Briefcase size={14} /> Trabajos
+              </NavLink>
+            </>
           )}
           <button
             onClick={logout}
@@ -124,6 +135,22 @@ export default function App() {
             element={
               <RequireAdmin>
                 <SupplierAdmin />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/portafolio"
+            element={
+              <RequireAuth>
+                <Portfolio />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/portafolio"
+            element={
+              <RequireAdmin>
+                <PortfolioAdmin />
               </RequireAdmin>
             }
           />

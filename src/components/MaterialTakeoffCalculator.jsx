@@ -1,12 +1,26 @@
 import { useMemo, useState } from "react";
 import { Ruler, ArrowRight, AlertCircle, ClipboardList } from "lucide-react";
-import { computeRoofTakeoff, computeFenceTakeoff, computeStairTakeoff } from "./lib/materialTakeoff.js";
+import {
+  computeRoofTakeoff,
+  computeFenceTakeoff,
+  computeStairTakeoff,
+  computeCladdingTakeoff,
+  computeRailingTakeoff,
+  computeGrilleTakeoff,
+  computeGateTakeoff,
+  computeLiftGateTakeoff,
+} from "./lib/materialTakeoff.js";
 
 const STORAGE_KEY_HANDOFF = "fm_takeoff_to_budget"; // leído por BudgetGenerator.jsx al abrir, si existe
 
 const STRUCTURE_TYPES = [
   { id: "galpon", label: "Galpón / Techo" },
+  { id: "cobertura", label: "Cobertura metálica" },
   { id: "cerco", label: "Cerco metálico" },
+  { id: "reja", label: "Rejas" },
+  { id: "porton", label: "Portones" },
+  { id: "levadiza", label: "Puerta levadiza" },
+  { id: "baranda", label: "Barandas" },
   { id: "escalera", label: "Escalera" },
 ];
 
@@ -25,6 +39,26 @@ export default function MaterialTakeoffCalculator() {
   const [fenceLengthM, setFenceLengthM] = useState("50");
   const [fenceHeightM, setFenceHeightM] = useState("2");
   const [postSpacingM, setPostSpacingM] = useState("2.5");
+
+  // Cobertura metálica (cerramiento plano)
+  const [claddingLengthM, setCladdingLengthM] = useState("6");
+  const [claddingHeightM, setCladdingHeightM] = useState("2.5");
+
+  // Baranda
+  const [railingLengthM, setRailingLengthM] = useState("5");
+  const [railingHeightM, setRailingHeightM] = useState("1.0");
+
+  // Reja
+  const [grilleWidthM, setGrilleWidthM] = useState("1.2");
+  const [grilleHeightM, setGrilleHeightM] = useState("1.5");
+
+  // Portón
+  const [gateWidthM, setGateWidthM] = useState("3.0");
+  const [gateHeightM, setGateHeightM] = useState("2.0");
+
+  // Puerta levadiza
+  const [liftWidthM, setLiftWidthM] = useState("2.5");
+  const [liftHeightM, setLiftHeightM] = useState("2.2");
 
   // Escalera
   const [riseM, setRiseM] = useState("3.0");
@@ -47,6 +81,12 @@ export default function MaterialTakeoffCalculator() {
           }),
         };
       }
+      if (structureType === "cobertura") {
+        return {
+          ok: true,
+          ...computeCladdingTakeoff({ lengthM: Number(claddingLengthM), heightM: Number(claddingHeightM) }),
+        };
+      }
       if (structureType === "cerco") {
         return {
           ok: true,
@@ -57,6 +97,30 @@ export default function MaterialTakeoffCalculator() {
           }),
         };
       }
+      if (structureType === "reja") {
+        return {
+          ok: true,
+          ...computeGrilleTakeoff({ widthM: Number(grilleWidthM), heightM: Number(grilleHeightM) }),
+        };
+      }
+      if (structureType === "porton") {
+        return {
+          ok: true,
+          ...computeGateTakeoff({ widthM: Number(gateWidthM), heightM: Number(gateHeightM) }),
+        };
+      }
+      if (structureType === "levadiza") {
+        return {
+          ok: true,
+          ...computeLiftGateTakeoff({ widthM: Number(liftWidthM), heightM: Number(liftHeightM) }),
+        };
+      }
+      if (structureType === "baranda") {
+        return {
+          ok: true,
+          ...computeRailingTakeoff({ lengthM: Number(railingLengthM), heightM: Number(railingHeightM) }),
+        };
+      }
       return {
         ok: true,
         ...computeStairTakeoff({ riseM: Number(riseM), widthM: Number(stairWidthM) }),
@@ -65,7 +129,12 @@ export default function MaterialTakeoffCalculator() {
       return { ok: false, error: err.message };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [structureType, lengthM, widthM, roofType, trussSpacingM, purlinSpacingM, sheetLengthM, fenceLengthM, fenceHeightM, postSpacingM, riseM, stairWidthM]);
+  }, [
+    structureType, lengthM, widthM, roofType, trussSpacingM, purlinSpacingM, sheetLengthM,
+    claddingLengthM, claddingHeightM, fenceLengthM, fenceHeightM, postSpacingM,
+    grilleWidthM, grilleHeightM, gateWidthM, gateHeightM, liftWidthM, liftHeightM,
+    railingLengthM, railingHeightM, riseM, stairWidthM,
+  ]);
 
   function handleSendToBudget() {
     if (!result.ok) return;
@@ -102,14 +171,15 @@ export default function MaterialTakeoffCalculator() {
 
       <main style={{ padding: "18px 16px 100px", maxWidth: 640, margin: "0 auto" }}>
         {/* Selector de tipo de estructura */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
           {STRUCTURE_TYPES.map((t) => (
             <button
               key={t.id}
               className="fm-seg"
               onClick={() => setStructureType(t.id)}
               style={{
-                flex: 1,
+                flex: "1 1 30%",
+                minWidth: 96,
                 padding: "10px 6px",
                 borderRadius: 8,
                 border: structureType === t.id ? "1px solid #F5A623" : "1px solid #D5D7D4",
@@ -136,7 +206,7 @@ export default function MaterialTakeoffCalculator() {
               <div style={{ marginBottom: 10 }}>
                 <label style={labelStyle}>Tipo de techo</label>
                 <div style={{ display: "flex", gap: 8 }}>
-                  {[{ id: "dos_aguas", label: "Dos aguas" }, { id: "una_agua", label: "Una agua" }].map((opt) => (
+                  {[{ id: "dos_aguas", label: "Dos aguas" }, { id: "una_agua", label: "Una agua" }, { id: "parabolico", label: "Parabólico" }].map((opt) => (
                     <button
                       key={opt.id}
                       className="fm-seg"
@@ -161,6 +231,13 @@ export default function MaterialTakeoffCalculator() {
             </>
           )}
 
+          {structureType === "cobertura" && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <Field label="Largo (m)" value={claddingLengthM} onChange={setCladdingLengthM} />
+              <Field label="Altura (m)" value={claddingHeightM} onChange={setCladdingHeightM} />
+            </div>
+          )}
+
           {structureType === "cerco" && (
             <>
               <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
@@ -169,6 +246,34 @@ export default function MaterialTakeoffCalculator() {
               </div>
               <Field label="Separación entre postes (m)" value={postSpacingM} onChange={setPostSpacingM} full />
             </>
+          )}
+
+          {structureType === "reja" && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <Field label="Ancho del vano (m)" value={grilleWidthM} onChange={setGrilleWidthM} />
+              <Field label="Altura del vano (m)" value={grilleHeightM} onChange={setGrilleHeightM} />
+            </div>
+          )}
+
+          {structureType === "porton" && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <Field label="Ancho de la hoja (m)" value={gateWidthM} onChange={setGateWidthM} />
+              <Field label="Altura (m)" value={gateHeightM} onChange={setGateHeightM} />
+            </div>
+          )}
+
+          {structureType === "levadiza" && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <Field label="Ancho del vano (m)" value={liftWidthM} onChange={setLiftWidthM} />
+              <Field label="Altura del vano (m)" value={liftHeightM} onChange={setLiftHeightM} />
+            </div>
+          )}
+
+          {structureType === "baranda" && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <Field label="Largo (m)" value={railingLengthM} onChange={setRailingLengthM} />
+              <Field label="Altura (m)" value={railingHeightM} onChange={setRailingHeightM} />
+            </div>
           )}
 
           {structureType === "escalera" && (
