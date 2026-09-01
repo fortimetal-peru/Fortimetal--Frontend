@@ -1,5 +1,5 @@
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase } from "lucide-react";
+import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase, ChevronRight } from "lucide-react";
 
 import SupplierDirectory from "./components/SupplierDirectory.jsx";
 import SupplierAdmin from "./components/SupplierAdmin.jsx";
@@ -14,10 +14,16 @@ import { useAuth } from "./context/AuthContext.jsx";
 const NAV_ITEMS = [
   { to: "/", label: "Inicio", icon: Home, end: true },
   { to: "/proveedores", label: "Proveedores", icon: PackageSearch },
-  { to: "/portafolio", label: "Trabajos", icon: Briefcase },
   { to: "/calculadora", label: "Metrados", icon: Ruler },
   { to: "/cotizador", label: "Cotizador", icon: FileText },
   { to: "/vista-previa", label: "Vista IA", icon: Sparkles },
+];
+
+// Accesos que NO van en la barra inferior (para no saturarla de íconos en pantallas
+// chicas) sino como una lista dentro de "Inicio". Cada uno se puede requerir sesión
+// o no, igual que las rutas reales — se respeta al navegar (RequireAuth se encarga).
+const MORE_LINKS = [
+  { to: "/portafolio", label: "Trabajos realizados", description: "Fotos y videos de proyectos entregados", icon: Briefcase },
 ];
 
 // Envuelve rutas que requieren sesión (hoy solo /proveedores, porque el backend
@@ -106,10 +112,33 @@ function HomePage() {
   return (
     <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
       <h1 className="fm-display" style={{ fontSize: 26, color: "#1A1A1A" }}>FORTIMETAL</h1>
-      <p style={{ color: "#4B5157", fontSize: 14 }}>
+      <p style={{ color: "#4B5157", fontSize: 14, marginBottom: 20 }}>
         Usa el menú de abajo para buscar proveedores, calcular metrados, armar una
         cotización de campo o generar una pre-visualización con IA.
       </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {MORE_LINKS.map(({ to, label, description, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            style={{
+              display: "flex", alignItems: "center", gap: 12, background: "#fff",
+              border: "1px solid #E5E6E3", borderRadius: 12, padding: "14px 14px",
+              textDecoration: "none", color: "#1A1A1A",
+            }}
+          >
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: "#FBEFDA", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Icon size={18} color="#F5A623" />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
+              <div style={{ fontSize: 12, color: "#8B9096" }}>{description}</div>
+            </div>
+            <ChevronRight size={18} color="#B8BCB9" />
+          </NavLink>
+        ))}
+      </div>
     </div>
   );
 }
