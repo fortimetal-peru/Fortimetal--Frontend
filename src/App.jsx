@@ -185,10 +185,11 @@ function HomePage() {
 
 export default function App() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <TopBar />
-      <main style={{ flex: 1, paddingBottom: 72 }}>
-        <Routes>
+    <div className="fm-viewport">
+      <div className="fm-phone">
+        <TopBar />
+        <main className="fm-scroll">
+          <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route
@@ -269,32 +270,34 @@ export default function App() {
               (POST /public/{slug}/quotes). Sin ellos, el componente sigue
               funcionando pero no persiste la imagen en el backend — ver
               comentario en RoofPreviewGenerator.jsx. */}
-          <Route path="/vista-previa" element={<RoofPreviewGenerator />} />
-        </Routes>
-      </main>
+            <Route path="/vista-previa" element={<RoofPreviewGenerator />} />
+          </Routes>
+        </main>
 
-      <nav
-        style={{
-          position: "fixed", bottom: 0, left: 0, right: 0, display: "flex",
-          background: "#1A1D21", borderTop: "1px solid #2A2E33", zIndex: 10,
-        }}
-      >
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            style={({ isActive }) => ({
-              flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
-              gap: 3, padding: "10px 4px", textDecoration: "none",
-              color: isActive ? "#F5A623" : "#8B9096", fontSize: 10.5,
-            })}
-          >
-            <Icon size={19} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
+        <nav
+          className="fm-bottomnav"
+          style={{
+            display: "flex",
+            background: "#1A1D21", borderTop: "1px solid #2A2E33", zIndex: 10,
+          }}
+        >
+          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              style={({ isActive }) => ({
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+                gap: 3, padding: "10px 4px", textDecoration: "none",
+                color: isActive ? "#F5A623" : "#8B9096", fontSize: 10.5,
+              })}
+            >
+              <Icon size={19} />
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+      </div>
     </div>
   );
 }
