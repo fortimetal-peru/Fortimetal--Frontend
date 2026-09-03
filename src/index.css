@@ -155,10 +155,12 @@ body {
   overflow: hidden;
 }
 
-/* Espacio reservado para el logo. Ajusta el alto si el archivo
-   final queda muy chico o muy grande dentro de la cabecera. */
+/* Logo del header. A 44px se alcanzan a ver los detalles del
+   engranaje sin tocar el borde superior/inferior de la cabecera
+   (58px de alto). Cuando se agregue el texto junto al logo, bajar
+   este valor a ~30px para dejarle espacio a la palabra. */
 .fm-header-logo {
-  height: 30px;
+  height: 44px;
   width: auto;
   object-fit: contain;
 }
@@ -243,6 +245,53 @@ body {
   color: #c0392b;
   border-top: 1px solid #efefec;
   margin-top: 4px;
+}
+
+/* ============================================================
+   Hero de marca (logo + lema)
+   Fondo tipo "metal cepillado" simulado con gradiente, igual al
+   mockup de referencia. Se usa en el Inicio público y en el
+   Dashboard del cliente.
+   ============================================================ */
+.fm-hero {
+  padding: 26px 20px 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #e6e7e4 0%, #c6c8c4 30%, #efefec 55%, #b2b4b0 100%);
+  border-bottom: 1px solid #9a9c98;
+}
+
+.fm-hero-logo {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+.fm-hero-title {
+  margin: 14px 0 0;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #f5a623;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.fm-hero-subtitle {
+  margin: 6px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #3a3d40;
+}
+
+.fm-hero-line {
+  width: 26px;
+  height: 1px;
+  background: #6b6d69;
 }
 
 /* Barra inferior: ya no usa position:fixed, vive en el flujo normal

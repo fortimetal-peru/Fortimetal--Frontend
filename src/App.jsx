@@ -15,6 +15,7 @@ import ProjectsClient from "./components/ProjectsClient.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
+import BrandHero from "./components/BrandHero.jsx";
 import Login from "./components/Login.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
@@ -92,18 +93,7 @@ function Header() {
         <Menu size={22} />
       </button>
 
-      {/* Espacio reservado para el logo: cuando tengas el archivo final,
-          colócalo en /public/logo.png (o cambia el src acá). Si la imagen
-          no existe todavía, se oculta sola y queda solo el texto. */}
       <NavLink to="/" className="fm-header-brand" onClick={closeMenu}>
-        <img
-          src="/logo.png"
-          alt=""
-          className="fm-header-logo"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
         <span className="fm-header-title">FORTIMETAL</span>
       </NavLink>
 
@@ -174,34 +164,36 @@ function HomePage() {
   if (isAuthenticated) return <Dashboard />;
 
   return (
-    <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
-      <h1 className="fm-display" style={{ fontSize: 26, color: "#1A1A1A" }}>FORTIMETAL</h1>
-      <p style={{ color: "#4B5157", fontSize: 14, marginBottom: 20 }}>
-        Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
-        proveedores, calcular metrados o armar una cotización de campo.
-      </p>
+    <div>
+      <BrandHero />
+      <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
+        <p style={{ color: "#4B5157", fontSize: 14, marginBottom: 20 }}>
+          Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
+          proveedores, calcular metrados o armar una cotización de campo.
+        </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {MORE_LINKS.map(({ to, label, description, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            style={{
-              display: "flex", alignItems: "center", gap: 12, background: "#fff",
-              border: "1px solid #E5E6E3", borderRadius: 12, padding: "14px 14px",
-              textDecoration: "none", color: "#1A1A1A",
-            }}
-          >
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: "#FBEFDA", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Icon size={18} color="#F5A623" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
-              <div style={{ fontSize: 12, color: "#8B9096" }}>{description}</div>
-            </div>
-            <ChevronRight size={18} color="#B8BCB9" />
-          </NavLink>
-        ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {MORE_LINKS.map(({ to, label, description, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, background: "#fff",
+                border: "1px solid #E5E6E3", borderRadius: 12, padding: "14px 14px",
+                textDecoration: "none", color: "#1A1A1A",
+              }}
+            >
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: "#FBEFDA", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon size={18} color="#F5A623" />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
+                <div style={{ fontSize: 12, color: "#8B9096" }}>{description}</div>
+              </div>
+              <ChevronRight size={18} color="#B8BCB9" />
+            </NavLink>
+          ))}
+        </div>
       </div>
     </div>
   );
