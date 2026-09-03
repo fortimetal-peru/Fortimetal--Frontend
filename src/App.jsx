@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase, ChevronRight } from "lucide-react";
+import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase, ChevronRight, ChevronDown, FolderKanban, Package, ClipboardList } from "lucide-react";
 
 import SupplierDirectory from "./components/SupplierDirectory.jsx";
 import SupplierAdmin from "./components/SupplierAdmin.jsx";
 import Portfolio from "./components/Portfolio.jsx";
 import PortfolioAdmin from "./components/PortfolioAdmin.jsx";
+import ProjectAdmin from "./components/ProjectAdmin.jsx";
+import MaterialAdmin from "./components/MaterialAdmin.jsx";
+import OrderAdmin from "./components/OrderAdmin.jsx";
+import Dashboard from "./components/Dashboard.jsx";
+import MaterialsCatalog from "./components/MaterialsCatalog.jsx";
+import ProjectsClient from "./components/ProjectsClient.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
@@ -23,6 +30,8 @@ const NAV_ITEMS = [
 // chicas) sino como una lista dentro de "Inicio". Cada uno se puede requerir sesión
 // o no, igual que las rutas reales — se respeta al navegar (RequireAuth se encarga).
 const MORE_LINKS = [
+  { to: "/proyectos", label: "Mis proyectos", description: "Avance, fotos y notificaciones", icon: FolderKanban },
+  { to: "/materiales", label: "Materiales", description: "Catálogo y pedidos", icon: Package },
   { to: "/portafolio", label: "Trabajos realizados", description: "Fotos y videos de proyectos entregados", icon: Briefcase },
 ];
 
@@ -57,34 +66,62 @@ function RequireAdmin({ children }) {
   return children;
 }
 
+const ADMIN_LINKS = [
+  { to: "/admin/proveedores", label: "Proveedores", icon: Settings },
+  { to: "/admin/portafolio", label: "Trabajos", icon: Briefcase },
+  { to: "/admin/proyectos", label: "Proyectos", icon: FolderKanban },
+  { to: "/admin/materiales", label: "Materiales", icon: Package },
+  { to: "/admin/pedidos", label: "Pedidos", icon: ClipboardList },
+];
+
 function TopBar() {
   const { user, logout } = useAuth();
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const isAdmin = user && (user.role === "admin" || user.role === "super_admin");
+
   return (
     <div
       style={{
         display: "flex", alignItems: "center", justifyContent: "flex-end",
-        gap: 10, padding: "10px 16px", fontSize: 12.5, color: "#4B5157",
+        gap: 10, padding: "10px 16px", fontSize: 12.5, color: "#4B5157", position: "relative",
       }}
     >
       {user ? (
         <>
           <UserIcon size={14} />
           <span>{user.full_name}</span>
-          {(user.role === "admin" || user.role === "super_admin") && (
-            <>
-              <NavLink
-                to="/admin/proveedores"
-                style={{ display: "flex", alignItems: "center", gap: 4, color: "#4B5157", textDecoration: "none" }}
+          {isAdmin && (
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setAdminMenuOpen((v) => !v)}
+                style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#4B5157", cursor: "pointer", fontSize: 12.5, padding: 0 }}
               >
-                <Settings size={14} /> Administrar
-              </NavLink>
-              <NavLink
-                to="/admin/portafolio"
-                style={{ display: "flex", alignItems: "center", gap: 4, color: "#4B5157", textDecoration: "none" }}
-              >
-                <Briefcase size={14} /> Trabajos
-              </NavLink>
-            </>
+                <Settings size={14} /> Administrar <ChevronDown size={12} />
+              </button>
+              {adminMenuOpen && (
+                <>
+                  <div onClick={() => setAdminMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 19 }} />
+                  <div
+                    style={{
+                      position: "absolute", top: "calc(100% + 8px)", right: 0, background: "#fff",
+                      border: "1px solid #E5E6E3", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                      minWidth: 170, overflow: "hidden", zIndex: 20,
+                    }}
+                  >
+                    {ADMIN_LINKS.map(({ to, label, icon: Icon }) => (
+                      <NavLink
+                        key={to}
+                        to={to}
+                        onClick={() => setAdminMenuOpen(false)}
+                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", color: "#1A1A1A", textDecoration: "none", fontSize: 13 }}
+                      >
+                        <Icon size={15} color="#F5A623" /> {label}
+                      </NavLink>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           )}
           <button
             onClick={logout}
@@ -109,12 +146,15 @@ function TopBar() {
 }
 
 function HomePage() {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) return <Dashboard />;
+
   return (
     <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
       <h1 className="fm-display" style={{ fontSize: 26, color: "#1A1A1A" }}>FORTIMETAL</h1>
       <p style={{ color: "#4B5157", fontSize: 14, marginBottom: 20 }}>
-        Usa el menú de abajo para buscar proveedores, calcular metrados, armar una
-        cotización de campo o generar una pre-visualización con IA.
+        Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
+        proveedores, calcular metrados o armar una cotización de campo.
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -176,10 +216,50 @@ export default function App() {
             }
           />
           <Route
+            path="/proyectos"
+            element={
+              <RequireAuth>
+                <ProjectsClient />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/materiales"
+            element={
+              <RequireAuth>
+                <MaterialsCatalog />
+              </RequireAuth>
+            }
+          />
+          <Route
             path="/admin/portafolio"
             element={
               <RequireAdmin>
                 <PortfolioAdmin />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/proyectos"
+            element={
+              <RequireAdmin>
+                <ProjectAdmin />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/materiales"
+            element={
+              <RequireAdmin>
+                <MaterialAdmin />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/pedidos"
+            element={
+              <RequireAdmin>
+                <OrderAdmin />
               </RequireAdmin>
             }
           />
