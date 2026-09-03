@@ -2,7 +2,27 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderKanban, Package, Calculator, LifeBuoy, Bell, Phone, Mail, MessageCircle, ChevronRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
-import BrandHero from "./BrandHero.jsx";
+
+// Bloque de marca: logo + lema, con fondo tipo "metal cepillado".
+// Inline a propósito (igual que en App.jsx) para no depender de un
+// archivo separado y evitar problemas de resolución en el build.
+function BrandHero({
+  logoUrl = "/logo.webp",
+  title = "LA FUERZA DEL METAL",
+  subtitle = "EN TUS PROYECTOS",
+}) {
+  return (
+    <div className="fm-hero">
+      <img src={logoUrl} alt="FORTIMETAL" className="fm-hero-logo" />
+      <h2 className="fm-hero-title">{title}</h2>
+      <p className="fm-hero-subtitle">
+        <span className="fm-hero-line" aria-hidden="true" />
+        {subtitle}
+        <span className="fm-hero-line" aria-hidden="true" />
+      </p>
+    </div>
+  );
+}
 
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL || ""}/api/v1`;
 const MEDIA_BASE = import.meta.env.VITE_API_BASE_URL || "";

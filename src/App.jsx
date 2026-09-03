@@ -15,7 +15,6 @@ import ProjectsClient from "./components/ProjectsClient.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
-import BrandHero from "./components/BrandHero.jsx";
 import Login from "./components/Login.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
@@ -156,6 +155,28 @@ function Header() {
         </>
       )}
     </header>
+  );
+}
+
+// Bloque de marca: logo + lema, con fondo tipo "metal cepillado".
+// Va inline acá (y duplicado en Dashboard.jsx) a propósito: al no
+// depender de un archivo separado se evita cualquier problema de
+// resolución de imports en el build (mayúsculas/minúsculas, rutas, etc).
+function BrandHero({
+  logoUrl = "/logo.webp",
+  title = "LA FUERZA DEL METAL",
+  subtitle = "EN TUS PROYECTOS",
+}) {
+  return (
+    <div className="fm-hero">
+      <img src={logoUrl} alt="FORTIMETAL" className="fm-hero-logo" />
+      <h2 className="fm-hero-title">{title}</h2>
+      <p className="fm-hero-subtitle">
+        <span className="fm-hero-line" aria-hidden="true" />
+        {subtitle}
+        <span className="fm-hero-line" aria-hidden="true" />
+      </p>
+    </div>
   );
 }
 
