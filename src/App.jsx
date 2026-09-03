@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase, ChevronRight, ChevronDown, FolderKanban, Package, ClipboardList } from "lucide-react";
+import { Home, PackageSearch, Ruler, Sparkles, FileText, LogIn, LogOut, User as UserIcon, Settings, Briefcase, ChevronRight, FolderKanban, Package, ClipboardList, Menu } from "lucide-react";
 
 import SupplierDirectory from "./components/SupplierDirectory.jsx";
 import SupplierAdmin from "./components/SupplierAdmin.jsx";
@@ -74,74 +74,98 @@ const ADMIN_LINKS = [
   { to: "/admin/pedidos", label: "Pedidos", icon: ClipboardList },
 ];
 
-function TopBar() {
-  const { user, logout } = useAuth();
-  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+function Header() {
+  const { user, logout, isAuthenticated } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = user && (user.role === "admin" || user.role === "super_admin");
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "flex-end",
-        gap: 10, padding: "10px 16px", fontSize: 12.5, color: "#4B5157", position: "relative",
-      }}
-    >
-      {user ? (
+    <header className="fm-header">
+      <button
+        type="button"
+        className="fm-header-icon-btn"
+        onClick={() => setMenuOpen((v) => !v)}
+        aria-label="Abrir menú"
+        aria-expanded={menuOpen}
+      >
+        <Menu size={22} />
+      </button>
+
+      {/* Espacio reservado para el logo: cuando tengas el archivo final,
+          colócalo en /public/logo.png (o cambia el src acá). Si la imagen
+          no existe todavía, se oculta sola y queda solo el texto. */}
+      <NavLink to="/" className="fm-header-brand" onClick={closeMenu}>
+        <img
+          src="/logo.png"
+          alt=""
+          className="fm-header-logo"
+          onError={(e) => {
+            e.currentTarget.style.display = "none";
+          }}
+        />
+        <span className="fm-header-title">FORTIMETAL</span>
+      </NavLink>
+
+      <NavLink
+        to={isAuthenticated ? "/" : "/login"}
+        className="fm-header-icon-btn"
+        aria-label={isAuthenticated ? user?.full_name || "Perfil" : "Iniciar sesión"}
+        onClick={closeMenu}
+      >
+        <UserIcon size={20} />
+      </NavLink>
+
+      {menuOpen && (
         <>
-          <UserIcon size={14} />
-          <span>{user.full_name}</span>
-          {isAdmin && (
-            <div style={{ position: "relative" }}>
-              <button
-                onClick={() => setAdminMenuOpen((v) => !v)}
-                style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", color: "#4B5157", cursor: "pointer", fontSize: 12.5, padding: 0 }}
-              >
-                <Settings size={14} /> Administrar <ChevronDown size={12} />
-              </button>
-              {adminMenuOpen && (
-                <>
-                  <div onClick={() => setAdminMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 19 }} />
-                  <div
-                    style={{
-                      position: "absolute", top: "calc(100% + 8px)", right: 0, background: "#fff",
-                      border: "1px solid #E5E6E3", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                      minWidth: 170, overflow: "hidden", zIndex: 20,
-                    }}
+          <div className="fm-header-menu-backdrop" onClick={closeMenu} />
+          <div className="fm-header-menu">
+            {user && (
+              <div className="fm-header-menu-user">
+                <UserIcon size={14} /> {user.full_name}
+              </div>
+            )}
+
+            <NavLink to="/" className="fm-header-menu-item" onClick={closeMenu}>
+              <Home size={16} /> Fortimetal
+            </NavLink>
+
+            {isAdmin && (
+              <>
+                <div className="fm-header-menu-section">Administrar</div>
+                {ADMIN_LINKS.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    className="fm-header-menu-item fm-header-menu-item--sub"
+                    onClick={closeMenu}
                   >
-                    {ADMIN_LINKS.map(({ to, label, icon: Icon }) => (
-                      <NavLink
-                        key={to}
-                        to={to}
-                        onClick={() => setAdminMenuOpen(false)}
-                        style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", color: "#1A1A1A", textDecoration: "none", fontSize: 13 }}
-                      >
-                        <Icon size={15} color="#F5A623" /> {label}
-                      </NavLink>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-          <button
-            onClick={logout}
-            style={{
-              display: "flex", alignItems: "center", gap: 4, background: "none",
-              border: "none", color: "#4B5157", cursor: "pointer", fontSize: 12.5,
-            }}
-          >
-            <LogOut size={14} /> Salir
-          </button>
+                    <Icon size={15} /> {label}
+                  </NavLink>
+                ))}
+              </>
+            )}
+
+            {isAuthenticated ? (
+              <button
+                type="button"
+                className="fm-header-menu-item fm-header-menu-item--danger"
+                onClick={() => {
+                  closeMenu();
+                  logout();
+                }}
+              >
+                <LogOut size={16} /> Salir
+              </button>
+            ) : (
+              <NavLink to="/login" className="fm-header-menu-item" onClick={closeMenu}>
+                <LogIn size={16} /> Iniciar sesión
+              </NavLink>
+            )}
+          </div>
         </>
-      ) : (
-        <NavLink
-          to="/login"
-          style={{ display: "flex", alignItems: "center", gap: 4, color: "#F5A623", textDecoration: "none" }}
-        >
-          <LogIn size={14} /> Iniciar sesión
-        </NavLink>
       )}
-    </div>
+    </header>
   );
 }
 
@@ -187,7 +211,7 @@ export default function App() {
   return (
     <div className="fm-viewport">
       <div className="fm-phone">
-        <TopBar />
+        <Header />
         <main className="fm-scroll">
           <Routes>
           <Route path="/" element={<HomePage />} />

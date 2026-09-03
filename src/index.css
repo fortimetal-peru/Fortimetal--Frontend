@@ -100,6 +100,151 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ============================================================
+   Cabecera
+   Altura fija de 58px + el alto del "notch" real del celular
+   (safe-area). Ahí va el logo centrado, el menú hamburguesa a la
+   izquierda y el ícono de perfil a la derecha, tal como en el
+   mockup. Si después se ajusta el alto, basta con cambiar
+   --fm-header-h.
+   ============================================================ */
+:root {
+  --fm-header-h: 58px;
+}
+
+.fm-header {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--fm-header-h);
+  padding: env(safe-area-inset-top, 0px) 6px 0 6px;
+  background: #15171a;
+  border-bottom: 1px solid #2a2e33;
+}
+
+.fm-header-icon-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  color: #e7e7e4;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.fm-header-icon-btn:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fm-header-brand {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+/* Espacio reservado para el logo. Ajusta el alto si el archivo
+   final queda muy chico o muy grande dentro de la cabecera. */
+.fm-header-logo {
+  height: 30px;
+  width: auto;
+  object-fit: contain;
+}
+
+.fm-header-title {
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 15.5px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.fm-header-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.fm-header-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 8px;
+  z-index: 26;
+  min-width: 220px;
+  max-width: calc(100% - 16px);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  padding: 6px 0;
+}
+
+.fm-header-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5157;
+  border-bottom: 1px solid #efefec;
+  margin-bottom: 4px;
+}
+
+.fm-header-menu-section {
+  padding: 10px 16px 4px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b9096;
+}
+
+.fm-header-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: #1a1a1a;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.fm-header-menu-item:active {
+  background: #f7f5f0;
+}
+
+.fm-header-menu-item--sub {
+  padding-left: 30px;
+  font-size: 13.5px;
+  color: #4b5157;
+}
+
+.fm-header-menu-item--danger {
+  color: #c0392b;
+  border-top: 1px solid #efefec;
+  margin-top: 4px;
+}
+
 /* Barra inferior: ya no usa position:fixed, vive en el flujo normal
    del marco (que mide exactamente 100dvh), así que siempre queda
    pegada abajo del teléfono, real o simulado. */
