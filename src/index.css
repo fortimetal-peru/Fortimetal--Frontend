@@ -54,7 +54,13 @@ body {
   flex-direction: column;
   width: 100%;
   height: 100dvh;
-  background: #f7f7f5;
+  /* Fondo base de toda la app: negro metálico (mismo tratamiento
+     que el fondo de escritorio, pero más sutil ya que aquí va
+     contenido encima). Cualquier pantalla que no defina su propio
+     fondo cae en este. */
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.04), transparent 35%),
+    linear-gradient(160deg, #14171a 0%, #0d0f11 40%, #16181b 70%, #0a0b0c 100%);
   overflow: hidden;
   /* Truco: un transform crea un "containing block" nuevo, así que
      cualquier position:fixed dentro (modales, overlays, la barra

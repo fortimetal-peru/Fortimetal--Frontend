@@ -58,7 +58,7 @@ function RequireAdmin({ children }) {
   }
   if (user?.role !== "admin" && user?.role !== "super_admin") {
     return (
-      <div style={{ padding: 32, textAlign: "center", color: "#4B5157" }}>
+      <div style={{ padding: 32, textAlign: "center", color: "#9CA1A7" }}>
         Esta sección es solo para administradores de la empresa.
       </div>
     );
@@ -188,7 +188,7 @@ function HomePage() {
     <div>
       <BrandHero />
       <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
-        <p style={{ color: "#4B5157", fontSize: 14, marginBottom: 20 }}>
+        <p style={{ color: "#9CA1A7", fontSize: 14, marginBottom: 20 }}>
           Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
           proveedores, calcular metrados o armar una cotización de campo.
         </p>
@@ -199,19 +199,19 @@ function HomePage() {
               key={to}
               to={to}
               style={{
-                display: "flex", alignItems: "center", gap: 12, background: "#fff",
-                border: "1px solid #E5E6E3", borderRadius: 12, padding: "14px 14px",
-                textDecoration: "none", color: "#1A1A1A",
+                display: "flex", alignItems: "center", gap: 12, background: "#1C2126",
+                border: "1px solid #2A2E33", borderRadius: 12, padding: "14px 14px",
+                textDecoration: "none", color: "#F4F4F3",
               }}
             >
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: "#FBEFDA", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: "#2A2E33", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Icon size={18} color="#F5A623" />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
-                <div style={{ fontSize: 12, color: "#8B9096" }}>{description}</div>
+                <div style={{ fontSize: 12, color: "#9CA1A7" }}>{description}</div>
               </div>
-              <ChevronRight size={18} color="#B8BCB9" />
+              <ChevronRight size={18} color="#6B7076" />
             </NavLink>
           ))}
         </div>
