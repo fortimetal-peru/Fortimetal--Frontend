@@ -3,6 +3,27 @@ import { useNavigate } from "react-router-dom";
 import { FolderKanban, Package, Calculator, LifeBuoy, Bell, Phone, Mail, MessageCircle, ChevronRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
+// Bloque de marca: logo + lema, con fondo tipo "metal cepillado".
+// Inline a propósito (igual que en App.jsx) para no depender de un
+// archivo separado y evitar problemas de resolución en el build.
+function BrandHero({
+  logoUrl = "/logo.webp",
+  title = "LA FUERZA DEL METAL",
+  subtitle = "EN TUS PROYECTOS",
+}) {
+  return (
+    <div className="fm-hero">
+      <img src={logoUrl} alt="FORTIMETAL" className="fm-hero-logo" />
+      <h2 className="fm-hero-title">{title}</h2>
+      <p className="fm-hero-subtitle">
+        <span className="fm-hero-line" aria-hidden="true" />
+        {subtitle}
+        <span className="fm-hero-line" aria-hidden="true" />
+      </p>
+    </div>
+  );
+}
+
 const API_BASE = `${import.meta.env.VITE_API_BASE_URL || ""}/api/v1`;
 const MEDIA_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
@@ -43,21 +64,15 @@ export default function Dashboard() {
         .fm-display { font-family: 'Archivo', sans-serif; }
       `}</style>
 
-      {/* Hero */}
-      <div style={{ padding: "28px 20px 22px", textAlign: "center", background: "linear-gradient(180deg, #1C2126 0%, #14171A 100%)" }}>
-        {company?.logo_url && (
-          <img src={`${MEDIA_BASE}${company.logo_url}`} alt={company.name} style={{ width: 68, height: 68, objectFit: "contain", marginBottom: 10 }} />
-        )}
-        <h1 className="fm-display" style={{ fontSize: 22, color: "#fff", letterSpacing: "0.02em", margin: 0 }}>
-          {company?.name || "FORTIMETAL"}
-        </h1>
-        {company?.tagline && (
-          <p style={{ color: "#F5A623", fontSize: 12.5, fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", marginTop: 6 }}>
-            {company.tagline}
-          </p>
-        )}
-        <p style={{ color: "#8B9096", fontSize: 12.5, marginTop: 4 }}>Hola, {user?.full_name?.split(" ")[0]}</p>
-      </div>
+      {/* Hero: logo + lema. Si la empresa cargó su propio logo/lema desde
+          el backend, se usan; si no, cae en los valores del diseño fijo. */}
+      <BrandHero
+        logoUrl={company?.logo_url ? `${MEDIA_BASE}${company.logo_url}` : undefined}
+        title={company?.tagline ? company.tagline.toUpperCase() : undefined}
+      />
+      <p style={{ textAlign: "center", color: "#8B9096", fontSize: 12.5, padding: "12px 20px 0" }}>
+        Hola, {user?.full_name?.split(" ")[0]}
+      </p>
 
       <div style={{ padding: "0 16px", display: "flex", flexDirection: "column", gap: 12 }}>
         {/* Fila de 2 tarjetas: Proyectos + Materiales */}
