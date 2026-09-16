@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FolderKanban, Package, Calculator, LifeBuoy, Bell, Phone, Mail, MessageCircle, ChevronRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import PromoCarousel from "./PromoCarousel.jsx";
 
 // Bloque de marca: logo + lema, con fondo tipo "metal cepillado".
 // Inline a propósito (igual que en App.jsx) para no depender de un
@@ -63,6 +64,9 @@ export default function Dashboard() {
         @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&display=swap');
         .fm-display { font-family: 'Archivo', sans-serif; }
       `}</style>
+
+      {/* Carrusel de banners, justo debajo de la cabecera */}
+      <PromoCarousel />
 
       {/* Hero: logo + lema. Si la empresa cargó su propio logo/lema desde
           el backend, se usan; si no, cae en los valores del diseño fijo. */}
