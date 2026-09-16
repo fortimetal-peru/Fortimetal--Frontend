@@ -65,15 +65,16 @@ export default function Dashboard() {
         .fm-display { font-family: 'Archivo', sans-serif; }
       `}</style>
 
-      {/* Carrusel de banners, justo debajo de la cabecera */}
-      <PromoCarousel />
-
-      {/* Hero: logo + lema. Si la empresa cargó su propio logo/lema desde
-          el backend, se usan; si no, cae en los valores del diseño fijo. */}
+      {/* Hero: logo + lema, arriba de todo. Si la empresa cargó su propio
+          logo/lema desde el backend, se usan; si no, cae en los valores
+          del diseño fijo. */}
       <BrandHero
         logoUrl={company?.logo_url ? `${MEDIA_BASE}${company.logo_url}` : undefined}
         title={company?.tagline ? company.tagline.toUpperCase() : undefined}
       />
+
+      {/* Carrusel de banners, debajo del logo */}
+      <PromoCarousel />
       <p style={{ textAlign: "center", color: "#8B9096", fontSize: 12.5, padding: "12px 20px 0" }}>
         Hola, {user?.full_name?.split(" ")[0]}
       </p>
