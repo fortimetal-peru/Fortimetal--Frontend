@@ -1,7 +1,10 @@
 // Vercel Serverless Function: /api/render-preview
 // Recibe la foto del cliente + las opciones elegidas (tipo de techo, color, cobertura),
-// arma el prompt oculto y llama a Gemini 2.5 Flash Image ("Nano Banana") para editar
+// arma el prompt oculto y llama a Gemini 3.1 Flash Image ("Nano Banana 2") para editar
 // la foto real y devolver una pre-visualización.
+//
+// Nota: antes usaba gemini-2.5-flash-image ("Nano Banana" original), que Google
+// descontinúa el 2 de octubre de 2026. Este modelo es el sucesor vigente.
 //
 // La API key SIEMPRE vive en variables de entorno del servidor (Vercel > Settings >
 // Environment Variables), nunca se manda al frontend.
@@ -59,7 +62,7 @@ export default async function handler(req, res) {
 
   try {
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
