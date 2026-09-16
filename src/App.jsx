@@ -15,7 +15,10 @@ import ProjectsClient from "./components/ProjectsClient.jsx";
 import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.jsx";
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
+import ImageGallery from "./components/ImageGallery.jsx";
+import VideoGallery from "./components/VideoGallery.jsx";
 import Login from "./components/Login.jsx";
+import PromoCarousel from "./components/PromoCarousel.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 const NAV_ITEMS = [
@@ -187,6 +190,7 @@ function HomePage() {
   return (
     <div>
       <BrandHero />
+      <PromoCarousel />
       <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
         <p style={{ color: "#9CA1A7", fontSize: 14, marginBottom: 20 }}>
           Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
@@ -250,6 +254,22 @@ export default function App() {
             element={
               <RequireAuth>
                 <Portfolio />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/galeria-imagenes"
+            element={
+              <RequireAuth>
+                <ImageGallery />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/galeria-videos"
+            element={
+              <RequireAuth>
+                <VideoGallery />
               </RequireAuth>
             }
           />
