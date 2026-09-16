@@ -17,7 +17,7 @@ export default defineConfig({
         short_name: "FORTIMETAL",
         description: "Cotizador, calculadora de metrados y proveedores para estructuras metálicas.",
         theme_color: "#1A1A1A",
-        background_color: "#EDEEEC",
+        background_color: "#14171A",
         display: "standalone",
         start_url: "/",
         icons: [
