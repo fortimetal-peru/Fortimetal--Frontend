@@ -16,6 +16,7 @@ import MaterialTakeoffCalculator from "./components/MaterialTakeoffCalculator.js
 import BudgetGenerator from "./components/BudgetGenerator.jsx";
 import RoofPreviewGenerator from "./components/RoofPreviewGenerator.jsx";
 import Login from "./components/Login.jsx";
+import PromoCarousel from "./components/PromoCarousel.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 const NAV_ITEMS = [
@@ -58,7 +59,7 @@ function RequireAdmin({ children }) {
   }
   if (user?.role !== "admin" && user?.role !== "super_admin") {
     return (
-      <div style={{ padding: 32, textAlign: "center", color: "#4B5157" }}>
+      <div style={{ padding: 32, textAlign: "center", color: "#9CA1A7" }}>
         Esta sección es solo para administradores de la empresa.
       </div>
     );
@@ -92,18 +93,7 @@ function Header() {
         <Menu size={22} />
       </button>
 
-      {/* Espacio reservado para el logo: cuando tengas el archivo final,
-          colócalo en /public/logo.png (o cambia el src acá). Si la imagen
-          no existe todavía, se oculta sola y queda solo el texto. */}
       <NavLink to="/" className="fm-header-brand" onClick={closeMenu}>
-        <img
-          src="/logo.png"
-          alt=""
-          className="fm-header-logo"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
         <span className="fm-header-title">FORTIMETAL</span>
       </NavLink>
 
@@ -169,39 +159,64 @@ function Header() {
   );
 }
 
+// Bloque de marca: logo + lema, con fondo tipo "metal cepillado".
+// Va inline acá (y duplicado en Dashboard.jsx) a propósito: al no
+// depender de un archivo separado se evita cualquier problema de
+// resolución de imports en el build (mayúsculas/minúsculas, rutas, etc).
+function BrandHero({
+  logoUrl = "/logo.webp",
+  title = "LA FUERZA DEL METAL",
+  subtitle = "EN TUS PROYECTOS",
+}) {
+  return (
+    <div className="fm-hero">
+      <img src={logoUrl} alt="FORTIMETAL" className="fm-hero-logo" />
+      <h2 className="fm-hero-title">{title}</h2>
+      <p className="fm-hero-subtitle">
+        <span className="fm-hero-line" aria-hidden="true" />
+        {subtitle}
+        <span className="fm-hero-line" aria-hidden="true" />
+      </p>
+    </div>
+  );
+}
+
 function HomePage() {
   const { isAuthenticated } = useAuth();
   if (isAuthenticated) return <Dashboard />;
 
   return (
-    <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
-      <h1 className="fm-display" style={{ fontSize: 26, color: "#1A1A1A" }}>FORTIMETAL</h1>
-      <p style={{ color: "#4B5157", fontSize: 14, marginBottom: 20 }}>
-        Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
-        proveedores, calcular metrados o armar una cotización de campo.
-      </p>
+    <div>
+      <PromoCarousel />
+      <BrandHero />
+      <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
+        <p style={{ color: "#9CA1A7", fontSize: 14, marginBottom: 20 }}>
+          Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
+          proveedores, calcular metrados o armar una cotización de campo.
+        </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {MORE_LINKS.map(({ to, label, description, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            style={{
-              display: "flex", alignItems: "center", gap: 12, background: "#fff",
-              border: "1px solid #E5E6E3", borderRadius: 12, padding: "14px 14px",
-              textDecoration: "none", color: "#1A1A1A",
-            }}
-          >
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: "#FBEFDA", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Icon size={18} color="#F5A623" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
-              <div style={{ fontSize: 12, color: "#8B9096" }}>{description}</div>
-            </div>
-            <ChevronRight size={18} color="#B8BCB9" />
-          </NavLink>
-        ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {MORE_LINKS.map(({ to, label, description, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, background: "#1C2126",
+                border: "1px solid #2A2E33", borderRadius: 12, padding: "14px 14px",
+                textDecoration: "none", color: "#F4F4F3",
+              }}
+            >
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: "#2A2E33", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon size={18} color="#F5A623" />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>{label}</div>
+                <div style={{ fontSize: 12, color: "#9CA1A7" }}>{description}</div>
+              </div>
+              <ChevronRight size={18} color="#6B7076" />
+            </NavLink>
+          ))}
+        </div>
       </div>
     </div>
   );
