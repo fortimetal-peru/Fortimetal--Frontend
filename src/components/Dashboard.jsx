@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FolderKanban, Package, Calculator, LifeBuoy, Bell, Phone, Mail, MessageCircle, ChevronRight } from "lucide-react";
+import { FolderKanban, Package, Calculator, LifeBuoy, Bell, Phone, Mail, MessageCircle, ChevronRight, Images, Video } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import PromoCarousel from "./PromoCarousel.jsx";
 
@@ -75,6 +75,33 @@ export default function Dashboard() {
 
       {/* Carrusel de banners, debajo del logo */}
       <PromoCarousel />
+
+      {/* Accesos a las galerías: las fotos y videos de trabajos entregados,
+          justo debajo del carrusel. */}
+      <div style={{ display: "flex", gap: 10, padding: "14px 16px 0" }}>
+        <button
+          onClick={() => navigate("/galeria-imagenes")}
+          style={{
+            flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+            background: "#1C2126", border: "1px solid #2A2E33", borderRadius: 12,
+            padding: "14px 8px", color: "#F4F4F3", cursor: "pointer",
+          }}
+        >
+          <Images size={20} color="#F5A623" />
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>Galería de imágenes</span>
+        </button>
+        <button
+          onClick={() => navigate("/galeria-videos")}
+          style={{
+            flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+            background: "#1C2126", border: "1px solid #2A2E33", borderRadius: 12,
+            padding: "14px 8px", color: "#F4F4F3", cursor: "pointer",
+          }}
+        >
+          <Video size={20} color="#F5A623" />
+          <span style={{ fontSize: 12.5, fontWeight: 600 }}>Galería de videos</span>
+        </button>
+      </div>
       <p style={{ textAlign: "center", color: "#8B9096", fontSize: 12.5, padding: "12px 20px 0" }}>
         Hola, {user?.full_name?.split(" ")[0]}
       </p>
