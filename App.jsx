@@ -187,8 +187,8 @@ function HomePage() {
 
   return (
     <div>
-      <PromoCarousel />
       <BrandHero />
+      <PromoCarousel />
       <div style={{ padding: 24, maxWidth: 480, margin: "0 auto" }}>
         <p style={{ color: "#9CA1A7", fontSize: 14, marginBottom: 20 }}>
           Inicia sesión para ver tus proyectos, o usa el menú de abajo para buscar
