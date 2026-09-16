@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 // Splash de bienvenida: se muestra una sola vez al abrir la app (no depende
 // de esperar ninguna respuesta del servidor, es puramente de marca) y luego
 // se desvanece hacia el contenido real. Dura ~1.5s en total.
-const VISIBLE_MS = 1200;
+const VISIBLE_MS = 2200;
 const FADE_MS = 350;
 
 export default function SplashScreen({ onDone }) {
