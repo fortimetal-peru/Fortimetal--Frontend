@@ -19,6 +19,7 @@ import ImageGallery from "./components/ImageGallery.jsx";
 import VideoGallery from "./components/VideoGallery.jsx";
 import Login from "./components/Login.jsx";
 import PromoCarousel from "./components/PromoCarousel.jsx";
+import SplashScreen from "./components/SplashScreen.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 const NAV_ITEMS = [
@@ -225,9 +226,12 @@ function HomePage() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <div className="fm-viewport">
       <div className="fm-phone">
+        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
         <Header />
         <main className="fm-scroll">
           <Routes>
